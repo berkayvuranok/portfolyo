@@ -1,74 +1,50 @@
-# React + TypeScript + Vite
+# 🚀 Berkay Vuranok - Personal Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern, responsive, and interactive personal portfolio website. Built with React, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+![Portfolio](https://img.shields.io/badge/Portfolio-Live-success)
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## React Compiler
+### 🎯 Core Features
+- **Responsive Design**: Optimal viewing on all devices (iPhone SE 320px+)
+- **Theme Support**: Dark/light mode toggle
+- **Single Page Application**: Tab-based navigation system
+- **GitHub Integration**: Automatic GitHub repo fetching and display
+- **Modern Animations**: Smooth transitions and hover effects
+- **Modern UI/UX**: Gradient colors, backdrop blur and interactive elements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🎨 UI/UX Features
+- Animated background with floating gradient circles
+- Interactive elements with hover effects and scale animations
+- Loading states with skeleton loading and spinners
+- Responsive navigation with mobile-friendly tab system
+- Gradient typography with color transitions
+- Card-based modern layout design
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend
+- **React 18** - Modern React hooks and concurrent features
+- **TypeScript** - Type safety and better developer experience
+- **Tailwind CSS** - Utility-first CSS framework
+- **Vite** - Fast build tool and development server
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### API & Integrations
+- **GitHub REST API** - Repository data fetching
+- **Responsive Images** - Optimized image handling
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Tools & Libraries
+- **ESLint** - Code linting and quality control
+- **Prettier** - Code formatting
+- **Lucide React** - Modern icon library
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📦 Installation & Setup
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-# portfolyo
+### 1. Clone Repository
+```bash
+git clone https://github.com/berkayvuranok/portfolio.git
+cd portfolio
