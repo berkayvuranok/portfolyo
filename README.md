@@ -47,4 +47,4 @@ Modern, responsive, and interactive personal portfolio website. Built with React
 ### 1. Clone Repository
 ```bash
 git clone https://github.com/berkayvuranok/portfolio.git
-cd portfolio
+cd portfolio 
