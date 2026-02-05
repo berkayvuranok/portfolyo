@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import profilephoto from "./assets/berkay.jpeg";
+import { motion, AnimatePresence } from "framer-motion";
 
+// --- Types ---
 interface Repo {
   id: number;
   name: string;
@@ -10,6 +11,15 @@ interface Repo {
   topics: string[];
 }
 
+interface Skill {
+  name: string;
+  icon: string;
+  category: string;
+  description: string;
+  matchKeys: string[]; // Keys to match with repo language or topics
+}
+
+// --- Data ---
 const certificates = [
   {
     provider: "Udemy",
@@ -44,20 +54,105 @@ const certificates = [
   },
 ];
 
-const skills = [
-  { name: "React", icon: "⚛️", category: "Frontend" },
-  { name: "Flutter", icon: "📱", category: "Mobile" },
-  { name: "Python", icon: "🐍", category: "Backend" },
-  { name: "JavaScript", icon: "🟨", category: "Frontend" },
-  { name: "TypeScript", icon: "🔷", category: "Frontend" },
-  { name: "C#", icon: "🔵", category: "Backend" },
-  { name: "Java", icon: "☕", category: "Backend" },
-  { name: "Dart", icon: "🎯", category: "Mobile" },
-  { name: "HTML", icon: "🌐", category: "Frontend" },
-  { name: "CSS", icon: "🎨", category: "Frontend" },
-  { name: "C", icon: "⚙️", category: "System" },
-  { name: "Supabase", icon: "🚀", category: "Database" },
-  { name: "Figma", icon: "🎨", category: "Design" },
+const skills: Skill[] = [
+  { 
+    name: "React", 
+    icon: "⚛️", 
+    category: "Frontend", 
+    description: "Modern web arayüzleri oluşturmak için kullandığım, bileşen tabanlı favori kütüphanem.",
+    matchKeys: ["React", "TypeScript", "JavaScript", "TSX", "JSX"]
+  },
+  { 
+    name: "Flutter", 
+    icon: "📱", 
+    category: "Mobile", 
+    description: "Tek kod tabanıyla hem iOS hem Android için performanslı native uygulamalar geliştiriyorum.",
+    matchKeys: ["Flutter", "Dart"]
+  },
+  { 
+    name: "Python", 
+    icon: "🐍", 
+    category: "Backend", 
+    description: "Veri analizi, yapay zeka ve backend servisleri için kullandığım güçlü dil.",
+    matchKeys: ["Python", "Django", "Flask"]
+  },
+  { 
+    name: "JavaScript", 
+    icon: "🟨", 
+    category: "Frontend", 
+    description: "Web'in dili. Dinamik ve etkileşimli ön yüzler için temel taşım.",
+    matchKeys: ["JavaScript", "JS"]
+  },
+  { 
+    name: "TypeScript", 
+    icon: "🔷", 
+    category: "Frontend", 
+    description: "Tip güvenliği sağlayarak daha ölçeklenebilir ve hatasız kod yazmamı sağlar.",
+    matchKeys: ["TypeScript", "TS"]
+  },
+  { 
+    name: "C#", 
+    icon: "🔵", 
+    category: "Backend", 
+    description: ".NET ekosistemi ile güçlü backend servisleri ve oyun geliştirme.",
+    matchKeys: ["C#", "C Sharp"]
+  },
+  { 
+    name: "Java", 
+    icon: "☕", 
+    category: "Backend", 
+    description: "Nesne yönelimli programlamanın temeli, kurumsal uygulama geliştirme.",
+    matchKeys: ["Java"]
+  },
+  { 
+    name: "Dart", 
+    icon: "🎯", 
+    category: "Mobile", 
+    description: "Flutter uygulamaları için optimize edilmiş, hızlı derlenen modern dil.",
+    matchKeys: ["Dart"]
+  },
+  { 
+    name: "HTML", 
+    icon: "🌐", 
+    category: "Frontend", 
+    description: "Web sayfalarının iskeleti ve semantik yapısı.",
+    matchKeys: ["HTML"]
+  },
+  { 
+    name: "CSS", 
+    icon: "🎨", 
+    category: "Frontend", 
+    description: "Modern, responsive ve estetik tasarımlar için stil aracı.",
+    matchKeys: ["CSS", "SCSS"]
+  },
+  { 
+    name: "C", 
+    icon: "⚙️", 
+    category: "System", 
+    description: "Sistem programlama ve bellek yönetimi temelleri.",
+    matchKeys: ["C"]
+  },
+  { 
+    name: "Supabase", 
+    icon: "🚀", 
+    category: "Database", 
+    description: "Hızlı, ölçeklenebilir ve gerçek zamanlı veritabanı çözümleri.",
+    matchKeys: ["SQL", "Database"]
+  },
+  { 
+    name: "Figma", 
+    icon: "🎨", 
+    category: "Design", 
+    description: "UI/UX tasarımlarını kodlamadan önce prototiplemek için kullandığım araç.",
+    matchKeys: ["Design"]
+  },
+];
+
+const tabs = [
+  { id: "about", label: "Hakkımda", emoji: "👋" },
+  { id: "projects", label: "Projeler", emoji: "🚀" },
+  { id: "skills", label: "Yetenekler", emoji: "⚡" },
+  { id: "certificates", label: "Sertifikalar", emoji: "🎓" },
 ];
 
 export default function App() {
@@ -65,12 +160,13 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [activeTab, setActiveTab] = useState("about");
   const [loading, setLoading] = useState(true);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
 
   useEffect(() => {
     fetch("https://api.github.com/users/berkayvuranok/repos")
       .then((res) => res.json())
       .then((data) => {
-        setRepos(data);
+        setRepos(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((error) => {
@@ -79,14 +175,8 @@ export default function App() {
       });
   }, []);
 
-  const tabs = [
-    { id: "about", label: "Hakkımda", emoji: "👋" },
-    { id: "projects", label: "Projeler", emoji: "🚀" },
-    { id: "skills", label: "Yetenekler", emoji: "⚡" },
-    { id: "certificates", label: "Sertifikalar", emoji: "🎓" },
-  ];
-
-  const getLanguageColor = (language: string) => {
+  const getLanguageColor = (language: string | null) => {
+    if (!language) return "bg-gray-500";
     const colors: { [key: string]: string } = {
       JavaScript: "bg-yellow-500",
       TypeScript: "bg-blue-500",
@@ -95,440 +185,415 @@ export default function App() {
       Java: "bg-red-500",
       Flutter: "bg-cyan-500",
       Dart: "bg-teal-500",
+      HTML: "bg-orange-500",
+      CSS: "bg-blue-400",
     };
     return colors[language] || "bg-gray-500";
   };
 
+  // Filter repos based on selected skill
+  const getRelatedRepos = (skill: Skill) => {
+    return repos.filter(repo => {
+      const langMatch = repo.language && skill.matchKeys.some(key => repo.language.includes(key));
+      const topicMatch = repo.topics && repo.topics.some(topic => skill.matchKeys.some(key => topic.toLowerCase().includes(key.toLowerCase())));
+      const descMatch = repo.description && skill.matchKeys.some(key => repo.description.toLowerCase().includes(key.toLowerCase()));
+      return langMatch || topicMatch || descMatch;
+    });
+  };
+
   return (
-    <div className={`min-h-screen transition-all duration-500 overflow-x-hidden ${
+    <div className={`min-h-[100dvh] w-full transition-colors duration-500 overflow-x-hidden font-sans ${
       darkMode 
-        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100' 
-        : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900'
+        ? 'bg-[#0f172a] text-gray-100 selection:bg-purple-500 selection:text-white' 
+        : 'bg-gray-50 text-gray-900 selection:bg-blue-500 selection:text-white'
     }`}>
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
-          darkMode ? 'bg-purple-500' : 'bg-purple-300'
-        }`} style={{ animation: 'float 6s ease-in-out infinite' }}></div>
-        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl opacity-20 ${
-          darkMode ? 'bg-blue-500' : 'bg-blue-300'
-        }`} style={{ animation: 'float 8s ease-in-out infinite reverse' }}></div>
+      
+      {/* Background Gradients */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <motion.div 
+          animate={{ x: [0, 50, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className={`absolute -top-20 -right-20 w-96 h-96 rounded-full blur-[100px] opacity-20 ${
+          darkMode ? 'bg-purple-600' : 'bg-blue-400'
+        }`} />
+        <motion.div 
+          animate={{ x: [0, -30, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className={`absolute top-1/2 -left-20 w-72 h-72 rounded-full blur-[100px] opacity-20 ${
+          darkMode ? 'bg-blue-600' : 'bg-purple-400'
+        }`} />
       </div>
 
       {/* Header */}
-      <header className={`backdrop-blur-md sticky top-0 z-50 transition-all duration-300 border-b ${
-        darkMode ? 'bg-gray-900/80 border-gray-700' : 'bg-white/80 border-gray-200'
+      <header className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors duration-300 ${
+        darkMode ? 'bg-gray-900/70 border-gray-800' : 'bg-white/70 border-gray-200'
       }`}>
-        <div className="max-w-6xl mx-auto p-4 md:p-6 flex justify-between items-center">
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <div
-              className={`w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden flex items-center justify-center shadow-md ${
-                darkMode
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-500'
-              }`}
-            >
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center space-x-3"
+          >
+            <div className="relative">
+              <div className={`absolute inset-0 rounded-full blur-md opacity-50 ${darkMode ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
               <img
-                src={profilephoto}
+                src="/berkay.jpeg"
                 alt="Profile"
-                className="w-full h-full object-cover"
+                className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-transparent bg-clip-border"
               />
             </div>
-
-            <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               Berkay Vuranok
             </h1>
-          </div>
+          </motion.div>
           
-          <div className="flex items-center space-x-2 md:space-x-4">
-            <a
-              href="https://github.com/berkayvuranok"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`p-2 rounded-lg transition-all hover:scale-110 ${
-                darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
-              }`}
-            >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-              </svg>
-            </a>
-            <a
-              href="https://www.linkedin.com/in/berkayvuranok/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`p-2 rounded-lg transition-all hover:scale-110 ${
-                darkMode ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'
-              }`}
-            >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-            </a>
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center space-x-3"
+          >
+            <SocialLink href="https://github.com/berkayvuranok" icon="github" darkMode={darkMode} />
+            <SocialLink href="https://www.linkedin.com/in/berkayvuranok/" icon="linkedin" darkMode={darkMode} />
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all duration-300 hover:scale-105 ${
-                darkMode 
-                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 shadow-lg shadow-yellow-500/25' 
-                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25'
+              className={`p-2 rounded-xl transition-all active:scale-95 ${
+                darkMode ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-gray-100 text-purple-600 hover:bg-gray-200'
               }`}
             >
               {darkMode ? "☀️" : "🌙"}
             </button>
-          </div>
+          </motion.div>
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <nav className="max-w-4xl mx-auto p-4 md:p-6">
-        <div className={`flex space-x-1 p-1 rounded-xl overflow-x-auto scrollbar-hide ${
-          darkMode ? 'bg-gray-800/50' : 'bg-gray-200/50'
-        } backdrop-blur-sm`}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-shrink-0 py-2 px-3 md:py-3 md:px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2 ${
-                activeTab === tab.id
-                  ? `${darkMode 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25' 
-                      : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
-                    } transform scale-105`
-                  : `${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`
+      {/* Main Content */}
+      <main className="relative z-10 max-w-5xl mx-auto px-4 py-8 md:py-12 flex flex-col min-h-[calc(100vh-80px)]">
+        
+        {/* Navigation */}
+        <nav className="mb-6 md:mb-16 sticky top-20 z-30 px-2 md:px-0">
+          <div className={`flex overflow-x-auto flex-nowrap gap-2 p-2 rounded-2xl border backdrop-blur-md mx-auto w-full md:w-auto md:max-w-fit scrollbar-hide ${
+            darkMode ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white/40 border-gray-200/50'
+          }`}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative px-4 py-2 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-medium transition-all duration-300 ${
+                  activeTab === tab.id ? 'text-white' : (darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black')
+                }`}
+              >
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className={`absolute inset-0 rounded-xl ${
+                      darkMode ? 'bg-gradient-to-r from-purple-600 to-blue-600' : 'bg-gradient-to-r from-blue-500 to-purple-500'
+                    }`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <span>{tab.emoji}</span>
+                  <span>{tab.label}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="w-full"
+          >
+            {activeTab === "about" && (
+              <div className="flex flex-col items-center text-center">
+                <motion.div 
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="relative group cursor-pointer mb-8"
+                >
+                  <div className={`absolute -inset-1 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-500 ${
+                    darkMode ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gradient-to-r from-blue-400 to-purple-400'
+                  }`}></div>
+                  <img
+                    src="/berkay.jpeg"
+                    alt="Profile"
+                    className="relative w-32 h-32 md:w-48 md:h-48 rounded-full object-cover border-4 border-white/10"
+                  />
+                </motion.div>
+
+                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
+                  Merhaba, Ben Berkay!
+                </h2>
+                
+                <p className={`text-lg md:text-xl max-w-2xl leading-relaxed mb-12 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Yazılım dünyasında modern çözümler üreten, öğrenmeye tutkulu bir geliştiriciyim. 
+                  Frontend, Backend ve Mobil teknolojileri harmanlayarak kullanıcı dostu deneyimler tasarlıyorum.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                  <InfoCard title="Odak" emoji="🎯" text="Flutter, React ve Modern Web Teknolojileri" darkMode={darkMode} />
+                  <InfoCard title="Yaklaşım" emoji="💡" text="Clean Code, Sürdürülebilirlik ve Performans" darkMode={darkMode} />
+                  <InfoCard title="Hedef" emoji="🚀" text="Global ölçekte etkili ürünler geliştirmek" darkMode={darkMode} />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "projects" && (
+              <div>
+                <h2 className="text-3xl font-bold mb-8 text-center">GitHub Projelerim</h2>
+                {loading ? (
+                  <div className="flex justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {repos.map((repo, i) => (
+                      <RepoCard key={repo.id} repo={repo} index={i} darkMode={darkMode} getLanguageColor={getLanguageColor} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "skills" && (
+              <div className="space-y-12">
+                <div className="text-center mb-10">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Teknik Yetenekler</h2>
+                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                    Detayları ve ilgili projeleri görmek için kartlara tıklayın.
+                  </p>
+                </div>
+
+                {["Frontend", "Backend", "Mobile", "Database", "Design", "System"].map((category) => {
+                   const categorySkills = skills.filter(skill => skill.category === category);
+                   if (categorySkills.length === 0) return null;
+
+                   return (
+                     <div key={category}>
+                       <h3 className={`text-xl font-bold mb-6 pl-4 border-l-4 ${darkMode ? 'border-purple-500 text-gray-200' : 'border-blue-500 text-gray-800'}`}>
+                         {category}
+                       </h3>
+                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                         {categorySkills.map((skill) => (
+                           <SkillCard 
+                              key={skill.name} 
+                              skill={skill} 
+                              darkMode={darkMode} 
+                              onClick={() => setSelectedSkill(skill)}
+                            />
+                         ))}
+                       </div>
+                     </div>
+                   );
+                })}
+              </div>
+            )}
+
+            {activeTab === "certificates" && (
+              <div className="space-y-6">
+                 {certificates.map((cert, i) => (
+                   <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      className={`p-6 rounded-2xl border backdrop-blur-sm ${
+                        darkMode ? 'bg-gray-800/40 border-gray-700' : 'bg-white/60 border-gray-200'
+                      }`}
+                   >
+                     <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-purple-300' : 'text-blue-600'}`}>{cert.provider}</h3>
+                     <div className="flex flex-wrap gap-2">
+                       {cert.items.map((item, idx) => (
+                         <span key={idx} className={`px-3 py-1 rounded-full text-sm ${
+                            darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                         }`}>
+                           {item}
+                         </span>
+                       ))}
+                     </div>
+                   </motion.div>
+                 ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Skill Detail Modal */}
+      <AnimatePresence>
+        {selectedSkill && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSelectedSkill(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className={`w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl p-6 md:p-8 shadow-2xl relative border ${
+                darkMode 
+                  ? 'bg-gray-900 border-gray-700 text-gray-100' 
+                  : 'bg-white border-gray-200 text-gray-900'
               }`}
             >
-              <span className="text-sm md:text-lg">{tab.emoji}</span>
-              <span className="text-xs md:text-sm">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      {/* Content */}
-      <main className="max-w-6xl mx-auto px-4 md:px-6 pb-8 md:pb-12 overflow-x-hidden">
-        {/* About Section */}
-        {activeTab === "about" && (
-          <div className="animate-fade-in">
-            <div className="text-center mb-8 md:mb-12">
-              <div
-                className={`w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 md:mb-6 rounded-full overflow-hidden shadow-2xl ${
-                  darkMode
-                    ? 'bg-gradient-to-br from-purple-500 via-pink-500 to-red-500'
-                    : 'bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600'
-                }`}
-                style={{ animation: 'pulse 2s infinite' }}
+              <button 
+                onClick={() => setSelectedSkill(null)}
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-500/20 transition-colors"
               >
-                <img
-                  src={profilephoto}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
+                ✕
+              </button>
+
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-5xl">{selectedSkill.icon}</span>
+                <div>
+                  <h2 className="text-3xl font-bold">{selectedSkill.name}</h2>
+                  <span className={`text-sm px-2 py-0.5 rounded ${darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                    {selectedSkill.category}
+                  </span>
+                </div>
               </div>
 
-              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
-                Merhaba! 👋
-              </h2>
-              <p className={`text-base md:text-xl max-w-3xl mx-auto leading-relaxed ${
-                darkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
-                Ben <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Berkay Vuranok</span>. 
-                Yazılım geliştirici olarak modern teknolojilerle kullanıcı deneyimini ön planda tutan, 
-                performanslı ve ölçeklenebilir uygulamalar geliştiriyorum. Sürekli öğrenmeye ve 
-                kendimi geliştirmeye odaklı bir geliştiriciyim.
-              </p>
-            </div>
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-2 opacity-80">Hakkında</h3>
+                <p className="text-lg leading-relaxed">{selectedSkill.description}</p>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-              <div className={`p-4 md:p-6 rounded-xl backdrop-blur-sm transition-all hover:scale-105 ${
-                darkMode ? 'bg-gray-800/50 border border-gray-700' : 'bg-white/50 border border-gray-200'
-              }`}>
-                <div className="text-2xl md:text-3xl mb-2 md:mb-4">🎯</div>
-                <h3 className="text-lg md:text-xl font-bold mb-2">Odak</h3>
-                <p className={`text-sm md:text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Flutter ile mobil uygulama geliştirme (UI/UX, state management, API entegrasyonu)
-                  Backend ve frontend teknolojilerini öğrenme
-                  İngilizce iletişim becerilerimi geliştirme
-                </p>
-              </div>
-              <div className={`p-4 md:p-6 rounded-xl backdrop-blur-sm transition-all hover:scale-105 ${
-                darkMode ? 'bg-gray-800/50 border border-gray-700' : 'bg-white/50 border border-gray-200'
-              }`}>
-                <div className="text-2xl md:text-3xl mb-2 md:mb-4">💡</div>
-                <h3 className="text-lg md:text-xl font-bold mb-2">Yaklaşım</h3>
-                <p className={`text-sm md:text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Clean code prensiplerine uygun, sürdürülebilir çözümler
-                </p>
-              </div>
-              <div className={`p-4 md:p-6 rounded-xl backdrop-blur-sm transition-all hover:scale-105 ${
-                darkMode ? 'bg-gray-800/50 border border-gray-700' : 'bg-white/50 border border-gray-200'
-              }`}>
-                <div className="text-2xl md:text-3xl mb-2 md:mb-4">🌟</div>
-                <h3 className="text-lg md:text-xl font-bold mb-2">Hedef</h3>
-                <p className={`text-sm md:text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Kullanıcı deneyimini ön planda tutan inovatif projeler
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Projects Section */}
-        {activeTab === "projects" && (
-          <div className="animate-fade-in">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">🚀 Projelerim</h2>
-              <p className={`text-base md:text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                GitHub'daki açık kaynak projelerim ve çalışmalarım
-              </p>
-            </div>
-            
-            {loading ? (
-              <div className="flex justify-center items-center py-12 md:py-20">
-                <div className={`animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 ${
-                  darkMode ? 'border-purple-400' : 'border-blue-500'
-                }`}></div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-                {repos.slice(0, 9).map((repo, index) => (
-                  <div
-                    key={repo.id}
-                    className={`group rounded-xl md:rounded-2xl backdrop-blur-sm transition-all duration-500 hover:scale-105 hover:-translate-y-2 border ${
-                      darkMode 
-                        ? 'bg-gray-800/50 border-gray-700 hover:border-purple-500/50' 
-                        : 'bg-white/50 border-gray-200 hover:border-blue-500/50'
-                    } shadow-lg hover:shadow-2xl overflow-hidden`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="p-4 md:p-6">
-                      <div className="flex justify-between items-start mb-3 md:mb-4">
-                        <h3 className="text-lg md:text-xl font-bold group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all">
-                          {repo.name}
-                        </h3>
-                        {repo.language && (
-                          <span className={`px-2 py-1 rounded-full text-xs text-white ${getLanguageColor(repo.language)}`}>
-                            {repo.language}
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-xs md:text-sm mb-3 md:mb-4 line-clamp-3 ${
-                        darkMode ? 'text-gray-400' : 'text-gray-600'
-                      }`}>
-                        {repo.description || "Açıklama bulunmuyor"}
-                      </p>
-                      <a
+              <div>
+                <h3 className="text-lg font-semibold mb-4 opacity-80 flex items-center gap-2">
+                  <span>📂</span> İlgili Projeler
+                </h3>
+                
+                {getRelatedRepos(selectedSkill).length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {getRelatedRepos(selectedSkill).map(repo => (
+                      <a 
+                        key={repo.id}
                         href={repo.html_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center space-x-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all ${
+                        className={`block p-4 rounded-xl border transition-all hover:scale-[1.02] ${
                           darkMode 
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' 
-                            : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-                        } text-white shadow-lg hover:shadow-xl hover:scale-105`}
-                      >
-                        <span>GitHub'da Gör</span>
-                        <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Skills Section */}
-        {activeTab === "skills" && (
-          <div className="animate-fade-in">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">⚡ Yeteneklerim</h2>
-              <p className={`text-base md:text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                Uzmanlaştığım teknolojiler ve programlama dilleri
-              </p>
-            </div>
-            
-            {/* Skills Categories */}
-            <div className="space-y-8 md:space-y-12">
-              {["Frontend", "Backend", "Mobile", "Database", "Design", "System"].map((category) => {
-                const categorySkills = skills.filter(skill => skill.category === category);
-                if (categorySkills.length === 0) return null;
-                
-                return (
-                  <div key={category} className="space-y-4 md:space-y-6">
-                    <h3 className={`text-xl md:text-2xl font-bold text-center ${
-                      darkMode ? 'text-purple-400' : 'text-blue-600'
-                    }`}>
-                      {category} {category === "Frontend" ? "🎨" : category === "Backend" ? "⚡" : category === "Mobile" ? "📱" : category === "Database" ? "🗄️" : category === "Design" ? "🎯" : "⚙️"}
-                    </h3>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                      {categorySkills.map((skill, index) => (
-                        <div
-                          key={skill.name}
-                          className={`group relative p-3 md:p-6 rounded-xl md:rounded-2xl backdrop-blur-sm transition-all duration-500 hover:scale-110 hover:-translate-y-2 cursor-pointer ${
-                            darkMode 
-                              ? 'bg-gray-800/50 border border-gray-700 hover:border-purple-500/50 hover:bg-gray-700/50' 
-                              : 'bg-white/50 border border-gray-200 hover:border-blue-500/50 hover:bg-white/80'
-                          } shadow-lg hover:shadow-2xl`}
-                          style={{ animationDelay: `${index * 0.1}s` }}
-                        >
-                          {/* Skill Icon and Name */}
-                          <div className="text-center">
-                            <div className={`text-2xl md:text-4xl mb-2 md:mb-3 transform transition-transform duration-300 group-hover:scale-125`}>
-                              {skill.icon}
-                            </div>
-                            <h3 className="text-sm md:text-lg font-bold mb-1 md:mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 transition-all">
-                              {skill.name}
-                            </h3>
-                          </div>
-                          
-                          {/* Hover Animation Overlay */}
-                          <div className={`absolute inset-0 rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 ${
-                            darkMode 
-                              ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' 
-                              : 'bg-gradient-to-r from-blue-500/10 to-purple-600/10'
-                          }`}></div>
-                          
-                          {/* Floating Particles Effect */}
-                          <div className="absolute top-1 right-1 md:top-2 md:right-2 w-1 h-1 md:w-2 md:h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300" 
-                               style={{
-                                 background: darkMode ? '#a855f7' : '#3b82f6',
-                                 animation: 'float 2s ease-in-out infinite'
-                               }}>
-                          </div>
-                          <div className="absolute bottom-1 left-1 md:bottom-2 md:left-2 w-1 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500" 
-                               style={{
-                                 background: darkMode ? '#ec4899' : '#8b5cf6',
-                                 animation: 'float 3s ease-in-out infinite reverse'
-                               }}>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            {/* Skills Summary */}
-            <div className={`mt-8 md:mt-12 p-4 md:p-8 rounded-xl md:rounded-2xl backdrop-blur-sm text-center ${
-              darkMode 
-                ? 'bg-gradient-to-r from-gray-800/50 to-gray-700/50 border border-gray-600' 
-                : 'bg-gradient-to-r from-white/50 to-gray-50/50 border border-gray-300'
-            }`}>
-              <div className="text-4xl md:text-6xl mb-2 md:mb-4">🚀</div>
-              <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Sürekli Gelişim Halinde
-              </h3>
-              <p className={`text-sm md:text-lg ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Bu teknolojilerle projeler geliştiriyor, yeni beceriler öğreniyor ve 
-                kendimi sürekli geliştirmeye odaklanıyorum.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Certificates Section */}
-        {activeTab === "certificates" && (
-          <div className="animate-fade-in">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">🎓 Sertifikalarım</h2>
-              <p className={`text-base md:text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                Aldığım sertifikalar ve eğitimler
-              </p>
-            </div>
-            
-            <div className="space-y-4 md:space-y-8">
-              {certificates.map((cert, idx) => (
-                <div
-                  key={idx}
-                  className={`p-4 md:p-8 rounded-xl md:rounded-2xl backdrop-blur-sm transition-all hover:scale-105 border ${
-                    darkMode 
-                      ? 'bg-gray-800/50 border-gray-700 hover:border-purple-500/50' 
-                      : 'bg-white/50 border-gray-200 hover:border-blue-500/50'
-                  } shadow-lg hover:shadow-2xl`}
-                  style={{ animationDelay: `${idx * 0.2}s` }}
-                >
-                  <h3 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                    {cert.provider}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
-                    {cert.items.map((item, i) => (
-                      <div
-                        key={i}
-                        className={`flex items-center space-x-2 p-2 md:p-3 rounded-lg transition-all hover:scale-105 ${
-                          darkMode ? 'bg-gray-700/50' : 'bg-gray-100/50'
+                            ? 'bg-gray-800/50 border-gray-700 hover:border-purple-500' 
+                            : 'bg-gray-50 border-gray-200 hover:border-blue-500'
                         }`}
                       >
-                        <div className={`w-1 h-1 md:w-2 md:h-2 rounded-full ${
-                          darkMode ? 'bg-purple-400' : 'bg-blue-500'
-                        }`}></div>
-                        <span className="text-xs md:text-sm font-medium">{item}</span>
-                      </div>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-bold truncate">{repo.name}</span>
+                          <span className="text-xs opacity-60">↗</span>
+                        </div>
+                        <p className="text-xs opacity-70 line-clamp-2">{repo.description || "Açıklama yok"}</p>
+                      </a>
                     ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ) : (
+                  <div className={`p-4 rounded-xl text-center border border-dashed ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'}`}>
+                    Bu yetenekle etiketlenmiş açık kaynak proje bulunamadı.
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-      </main>
+      </AnimatePresence>
 
       {/* Footer */}
-      <footer className={`border-t backdrop-blur-sm ${
-        darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-white/50 border-gray-200'
+      <footer className={`mt-auto py-8 text-center border-t backdrop-blur-sm ${
+         darkMode ? 'border-gray-800 text-gray-500' : 'border-gray-200 text-gray-400'
       }`}>
-        <div className="max-w-6xl mx-auto p-4 md:p-8 text-center">
-          <p className={`text-xs md:text-sm ${
-            darkMode ? 'text-gray-400' : 'text-gray-600'
-          }`}>
-            © {new Date().getFullYear()} Berkay Vuranok. Tüm hakları saklıdır.
-          </p>
-          <div className="flex justify-center space-x-4 md:space-x-6 mt-2 md:mt-4">
-            <span className="text-xl md:text-2xl animate-bounce" style={{ animationDelay: '0s' }}>💻</span>
-            <span className="text-xl md:text-2xl animate-bounce" style={{ animationDelay: '0.2s' }}>🚀</span>
-            <span className="text-xl md:text-2xl animate-bounce" style={{ animationDelay: '0.4s' }}>✨</span>
-          </div>
-        </div>
+        <p className="text-sm">© {new Date().getFullYear()} Berkay Vuranok. Designed with ❤️ using React & Framer Motion.</p>
       </footer>
-
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(5deg); }
-        }
-
-        @keyframes skillBar {
-          from { width: 0%; }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-
-        .line-clamp-3 {
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 }
+
+// --- Subcomponents ---
+
+const SocialLink = ({ href, icon, darkMode }: { href: string; icon: "github" | "linkedin"; darkMode: boolean }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`p-2 rounded-xl transition-all hover:scale-110 ${
+      darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-800' : 'text-gray-600 hover:text-black hover:bg-gray-100'
+    }`}
+  >
+    {icon === "github" ? (
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+    ) : (
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+    )}
+  </a>
+);
+
+const InfoCard = ({ title, emoji, text, darkMode }: { title: string, emoji: string, text: string, darkMode: boolean }) => (
+  <motion.div 
+    whileHover={{ y: -5 }}
+    className={`p-6 rounded-2xl border backdrop-blur-sm text-left transition-all ${
+      darkMode ? 'bg-gray-800/40 border-gray-700 hover:bg-gray-800/60' : 'bg-white/60 border-gray-200 hover:bg-white/80'
+    }`}
+  >
+    <div className="text-3xl mb-3">{emoji}</div>
+    <h3 className="text-lg font-bold mb-2">{title}</h3>
+    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{text}</p>
+  </motion.div>
+);
+
+const RepoCard = ({ repo, index, darkMode, getLanguageColor }: { repo: Repo; index: number; darkMode: boolean; getLanguageColor: (l: string | null) => string }) => (
+  <motion.a
+    href={repo.html_url}
+    target="_blank"
+    rel="noopener noreferrer"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: index * 0.1 }}
+    whileHover={{ scale: 1.02 }}
+    className={`flex flex-col p-6 rounded-2xl border backdrop-blur-sm transition-all shadow-sm hover:shadow-xl ${
+      darkMode 
+        ? 'bg-gray-800/30 border-gray-700 hover:border-purple-500/50' 
+        : 'bg-white/60 border-gray-200 hover:border-blue-500/50'
+    }`}
+  >
+    <div className="flex justify-between items-start mb-4">
+      <h3 className="font-bold text-lg truncate pr-2 group-hover:text-purple-500 transition-colors">
+        {repo.name}
+      </h3>
+      <span className={`px-2 py-0.5 rounded text-[10px] font-medium text-white ${getLanguageColor(repo.language)}`}>
+        {repo.language || "N/A"}
+      </span>
+    </div>
+    <p className={`text-sm flex-grow mb-4 line-clamp-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+      {repo.description || "Açıklama bulunmuyor."}
+    </p>
+    <div className="flex items-center text-xs font-medium opacity-60">
+      <span>Görüntüle ↗</span>
+    </div>
+  </motion.a>
+);
+
+const SkillCard = ({ skill, darkMode, onClick }: { skill: Skill; darkMode: boolean; onClick: () => void }) => (
+  <motion.div
+    layoutId={`skill-${skill.name}`}
+    onClick={onClick}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className={`cursor-pointer flex flex-col items-center justify-center p-4 rounded-2xl border backdrop-blur-sm transition-all ${
+      darkMode 
+        ? 'bg-gray-800/40 border-gray-700 hover:bg-gray-700 hover:border-purple-500/50' 
+        : 'bg-white/60 border-gray-200 hover:bg-white hover:border-blue-500/50'
+    }`}
+  >
+    <span className="text-3xl md:text-4xl mb-2">{skill.icon}</span>
+    <span className="font-medium text-sm text-center">{skill.name}</span>
+  </motion.div>
+);
