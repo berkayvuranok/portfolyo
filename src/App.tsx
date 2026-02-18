@@ -249,7 +249,11 @@ export default function App() {
                 className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-transparent bg-clip-border"
               />
             </div>
-            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            <h1 className={`text-xl md:text-2xl font-bold bg-clip-text text-transparent ${
+              darkMode
+                ? 'bg-gradient-to-r from-white via-purple-200 to-white'
+                : 'bg-gradient-to-r from-slate-800 via-indigo-700 to-slate-800'
+            }`}>
               Berkay Vuranok
             </h1>
           </motion.div>
@@ -513,7 +517,7 @@ export default function App() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className={`w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl p-6 md:p-8 shadow-2xl relative border ${
+              className={`w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl p-6 md:p-8 relative border ${
                 darkMode 
                   ? 'bg-gray-900 border-gray-700 text-gray-100' 
                   : 'bg-white border-gray-200 text-gray-900'
@@ -630,7 +634,7 @@ const RepoCard = ({ repo, index, darkMode, getLanguageColor }: { repo: Repo; ind
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.1 }}
     whileHover={{ scale: 1.02 }}
-    className={`flex flex-col p-6 rounded-2xl border backdrop-blur-sm transition-all shadow-sm hover:shadow-xl ${
+    className={`flex flex-col p-6 rounded-2xl border backdrop-blur-sm transition-all ${
       darkMode 
         ? 'bg-gray-800/30 border-gray-700 hover:border-purple-500/50' 
         : 'bg-white/60 border-gray-200 hover:border-blue-500/50'
