@@ -154,7 +154,7 @@ const tabs = [
   { id: "projects", label: "Projeler", emoji: "🚀" },
   { id: "skills", label: "Yetenekler", emoji: "⚡" },
   { id: "certificates", label: "Sertifikalar", emoji: "🎓" },
-  { id: "flutter", label: "Flutter", emoji: "📱" },
+  { id: "articles", label: "Yazılarım", emoji: "📝" },
 ];
 
 export default function App() {
@@ -179,7 +179,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (activeTab !== "flutter") setSelectedArticleId(null);
+    if (activeTab !== "articles") setSelectedArticleId(null);
   }, [activeTab]);
 
   const getLanguageColor = (language: string | null) => {
@@ -430,7 +430,7 @@ export default function App() {
               </div>
             )}
 
-            {activeTab === "flutter" && (
+            {activeTab === "articles" && (
               <div className="space-y-8">
                 {selectedArticleId ? (
                   <ArticleDetail
@@ -441,38 +441,51 @@ export default function App() {
                 ) : (
                   <>
                     <div className="text-center">
-                      <h2 className="text-3xl md:text-4xl font-bold mb-2">Flutter Yazıları</h2>
+                      <h2 className="text-3xl md:text-4xl font-bold mb-2">Yazılarım</h2>
                       <p className={darkMode ? "text-gray-400" : "text-gray-600"}>
-                        Flutter ve Dart ile ilgili temel konular, örneklerle anlatılıyor.
+                        Flutter, Dart ve yapay zeka (AI) ile ilgili notlar ve örnekler.
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {flutterArticles.map((article, i) => (
-                        <motion.button
-                          key={article.id}
-                          initial={{ opacity: 0, y: 16 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                          onClick={() => setSelectedArticleId(article.id)}
-                          className={`text-left p-5 rounded-2xl border backdrop-blur-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${
-                            darkMode
-                              ? "bg-gray-800/40 border-gray-700 hover:border-cyan-500/50"
-                              : "bg-white/60 border-gray-200 hover:border-cyan-500/50"
-                          }`}
-                        >
-                          <span className="text-2xl mb-2 block">{article.emoji}</span>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                            darkMode ? "bg-cyan-900/50 text-cyan-300" : "bg-cyan-100 text-cyan-700"
+                    {(["Flutter", "AI"] as const).map((topic) => {
+                      const items = flutterArticles.filter((a) => a.topic === topic);
+                      if (items.length === 0) return null;
+                      return (
+                        <div key={topic}>
+                          <h3 className={`text-lg font-bold mb-4 pl-2 border-l-4 ${
+                            darkMode ? "border-cyan-500 text-cyan-200" : "border-cyan-600 text-cyan-800"
                           }`}>
-                            {article.category}
-                          </span>
-                          <h3 className="font-bold text-lg mt-2 mb-1">{article.title}</h3>
-                          <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"} line-clamp-2`}>
-                            {article.excerpt}
-                          </p>
-                        </motion.button>
-                      ))}
-                    </div>
+                            {topic === "Flutter" ? "📱 Flutter & Dart" : "🤖 Yapay Zeka (AI)"}
+                          </h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {items.map((article, i) => (
+                              <motion.button
+                                key={article.id}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                                onClick={() => setSelectedArticleId(article.id)}
+                                className={`text-left p-5 rounded-2xl border backdrop-blur-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                                  darkMode
+                                    ? "bg-gray-800/40 border-gray-700 hover:border-cyan-500/50"
+                                    : "bg-white/60 border-gray-200 hover:border-cyan-500/50"
+                                }`}
+                              >
+                                <span className="text-2xl mb-2 block">{article.emoji}</span>
+                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                                  darkMode ? "bg-cyan-900/50 text-cyan-300" : "bg-cyan-100 text-cyan-700"
+                                }`}>
+                                  {article.category}
+                                </span>
+                                <h3 className="font-bold text-lg mt-2 mb-1">{article.title}</h3>
+                                <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"} line-clamp-2`}>
+                                  {article.excerpt}
+                                </p>
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </>
                 )}
               </div>
