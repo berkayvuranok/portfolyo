@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { flutterArticles, type FlutterArticle, type ContentBlock } from "./data/flutterArticles";
 
 // --- Types ---
 interface Repo {
@@ -153,6 +154,7 @@ const tabs = [
   { id: "projects", label: "Projeler", emoji: "🚀" },
   { id: "skills", label: "Yetenekler", emoji: "⚡" },
   { id: "certificates", label: "Sertifikalar", emoji: "🎓" },
+  { id: "flutter", label: "Flutter", emoji: "📱" },
 ];
 
 export default function App() {
@@ -161,6 +163,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("about");
   const [loading, setLoading] = useState(true);
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("https://api.github.com/users/berkayvuranok/repos")
@@ -174,6 +177,10 @@ export default function App() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== "flutter") setSelectedArticleId(null);
+  }, [activeTab]);
 
   const getLanguageColor = (language: string | null) => {
     if (!language) return "bg-gray-500";
@@ -422,6 +429,54 @@ export default function App() {
                  ))}
               </div>
             )}
+
+            {activeTab === "flutter" && (
+              <div className="space-y-8">
+                {selectedArticleId ? (
+                  <ArticleDetail
+                    article={flutterArticles.find((a) => a.id === selectedArticleId)!}
+                    darkMode={darkMode}
+                    onBack={() => setSelectedArticleId(null)}
+                  />
+                ) : (
+                  <>
+                    <div className="text-center">
+                      <h2 className="text-3xl md:text-4xl font-bold mb-2">Flutter Yazıları</h2>
+                      <p className={darkMode ? "text-gray-400" : "text-gray-600"}>
+                        Flutter ve Dart ile ilgili temel konular, örneklerle anlatılıyor.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {flutterArticles.map((article, i) => (
+                        <motion.button
+                          key={article.id}
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          onClick={() => setSelectedArticleId(article.id)}
+                          className={`text-left p-5 rounded-2xl border backdrop-blur-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                            darkMode
+                              ? "bg-gray-800/40 border-gray-700 hover:border-cyan-500/50"
+                              : "bg-white/60 border-gray-200 hover:border-cyan-500/50"
+                          }`}
+                        >
+                          <span className="text-2xl mb-2 block">{article.emoji}</span>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                            darkMode ? "bg-cyan-900/50 text-cyan-300" : "bg-cyan-100 text-cyan-700"
+                          }`}>
+                            {article.category}
+                          </span>
+                          <h3 className="font-bold text-lg mt-2 mb-1">{article.title}</h3>
+                          <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"} line-clamp-2`}>
+                            {article.excerpt}
+                          </p>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </main>
@@ -597,3 +652,106 @@ const SkillCard = ({ skill, darkMode, onClick }: { skill: Skill; darkMode: boole
     <span className="font-medium text-sm text-center">{skill.name}</span>
   </motion.div>
 );
+
+function ArticleContent({ blocks, darkMode }: { blocks: ContentBlock[]; darkMode: boolean }) {
+  return (
+    <div className="space-y-4">
+      {blocks.map((block, i) => {
+        if (block.type === "h2") {
+          return (
+            <h2
+              key={i}
+              className={`text-xl font-bold mt-8 mb-2 first:mt-0 ${
+                darkMode ? "text-cyan-200" : "text-cyan-800"
+              }`}
+            >
+              {block.content}
+            </h2>
+          );
+        }
+        if (block.type === "h3") {
+          return (
+            <h3
+              key={i}
+              className={`text-lg font-semibold mt-6 mb-1 ${darkMode ? "text-gray-200" : "text-gray-800"}`}
+            >
+              {block.content}
+            </h3>
+          );
+        }
+        if (block.type === "p") {
+          return (
+            <p
+              key={i}
+              className={`leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-700"}`}
+            >
+              {block.content}
+            </p>
+          );
+        }
+        if (block.type === "code") {
+          return (
+            <pre
+              key={i}
+              className={`overflow-x-auto p-4 rounded-xl text-sm font-mono ${
+                darkMode
+                  ? "bg-gray-900 border border-gray-700 text-gray-200"
+                  : "bg-gray-100 border border-gray-200 text-gray-800"
+              }`}
+            >
+              <code>{block.content}</code>
+            </pre>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+}
+
+function ArticleDetail({
+  article,
+  darkMode,
+  onBack,
+}: {
+  article: FlutterArticle;
+  darkMode: boolean;
+  onBack: () => void;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-3xl mx-auto"
+    >
+      <button
+        onClick={onBack}
+        className={`flex items-center gap-2 mb-6 text-sm font-medium ${
+          darkMode ? "text-cyan-400 hover:text-cyan-300" : "text-cyan-600 hover:text-cyan-700"
+        }`}
+      >
+        ← Yazılara dön
+      </button>
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-4xl">{article.emoji}</span>
+        <div>
+          <span
+            className={`text-xs font-medium px-2 py-1 rounded-full ${
+              darkMode ? "bg-cyan-900/50 text-cyan-300" : "bg-cyan-100 text-cyan-700"
+            }`}
+          >
+            {article.category}
+          </span>
+          <h1 className="text-2xl md:text-3xl font-bold mt-1">{article.title}</h1>
+        </div>
+      </div>
+      <div
+        className={`rounded-2xl border p-6 md:p-8 ${
+          darkMode ? "bg-gray-800/40 border-gray-700" : "bg-white/60 border-gray-200"
+        }`}
+      >
+        <ArticleContent blocks={article.content} darkMode={darkMode} />
+      </div>
+    </motion.article>
+  );
+}
