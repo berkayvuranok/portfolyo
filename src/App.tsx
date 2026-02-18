@@ -335,7 +335,11 @@ export default function App() {
                   />
                 </motion.div>
 
-                <h2 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
+                <h2 className={`text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent ${
+                  darkMode
+                    ? 'bg-gradient-to-r from-white via-purple-200 to-white'
+                    : 'bg-gradient-to-r from-slate-800 via-indigo-700 to-slate-800'
+                }`}>
                   Merhaba, Ben Berkay!
                 </h2>
                 
