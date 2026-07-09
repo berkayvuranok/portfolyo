@@ -2,9 +2,12 @@ export type ContentBlock =
   | { type: "h2"; content: string }
   | { type: "h3"; content: string }
   | { type: "p"; content: string }
-  | { type: "code"; content: string; language?: string };
+  | { type: "code"; content: string; language?: string }
+  | { type: "list"; items: string[]; ordered?: boolean }
+  | { type: "callout"; content: string; variant?: "info" | "tip" | "warning" }
+  | { type: "quote"; content: string; author?: string };
 
-export type ArticleTopic = "Flutter" | "AI";
+export type ArticleTopic = "Flutter" | "AI" | "Web";
 
 export interface FlutterArticle {
   id: string;
@@ -14,6 +17,10 @@ export interface FlutterArticle {
   topic: ArticleTopic;
   emoji: string;
   content: ContentBlock[];
+  readTime?: number;
+  publishedAt?: string;
+  tags?: string[];
+  featured?: boolean;
 }
 
 export const flutterArticles: FlutterArticle[] = [
@@ -1137,6 +1144,794 @@ Sadece Dart kodu ver, açıklama ekleme.`,
         content:
           "LLM'ler de bir tür makine öğrenmesi modelidir; özellikle metin üretimi için eğitilmiş, çok büyük parametreli yapılardır. Klasik ML daha küçük veri ve daha dar görevler (örn. sadece sınıflandırma) için de kullanılır.",
       },
+    ],
+  },
+  {
+    id: "clean-architecture-flutter",
+    topic: "Flutter",
+    title: "Clean Architecture Flutter'da Nasıl Kurulur?",
+    excerpt: "Katmanlı mimari, repository pattern ve test edilebilir Flutter projesi oluşturma rehberi.",
+    category: "Mimari",
+    emoji: "🏗️",
+    readTime: 8,
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Clean Architecture", "Mimari", "Best Practice"],
+    featured: true,
+    content: [
+      {
+        type: "p",
+        content:
+          "Uygulama büyüdükçe tüm kodu ekran widget'larına yığmak hem bakımı zorlaştırır hem de test yazmayı neredeyse imkânsız hale getirir. Clean Architecture, iş mantığını UI'dan ayırarak projeyi ölçeklenebilir kılar.",
+      },
+      { type: "h2", content: "Bu yazıda neler var?" },
+      {
+        type: "list",
+        items: [
+          "Clean Architecture'ın üç ana katmanı",
+          "Repository ve use case kavramları",
+          "Flutter projesinde klasör yapısı örneği",
+          "Ne zaman bu yapıya geçmelisiniz?",
+        ],
+      },
+      { type: "h2", content: "Katmanlar" },
+      {
+        type: "p",
+        content:
+          "Presentation katmanı ekranları ve state'i yönetir. Domain katmanı iş kurallarını içerir; framework'ten bağımsızdır. Data katmanı API, veritabanı ve cache ile konuşur.",
+      },
+      {
+        type: "callout",
+        variant: "tip",
+        content:
+          "Küçük projelerde her katmanı ayrı klasörde tutmak fazla gelebilir. Önce domain ve data ayrımını yapın; proje büyüdükçe presentation'ı da netleştirin.",
+      },
+      { type: "h3", content: "Örnek klasör yapısı" },
+      {
+        type: "code",
+        content: `lib/
+  features/
+    auth/
+      data/          # API, model, repository impl
+      domain/        # entity, repository interface, use case
+      presentation/  # bloc/cubit, sayfalar, widget'lar
+  core/
+    network/
+    error/`,
+        language: "text",
+      },
+      { type: "h2", content: "Repository pattern" },
+      {
+        type: "p",
+        content:
+          "Domain katmanında abstract repository tanımlarsınız; data katmanında somut implementasyonu yazarsınız. Böylece use case'ler verinin nereden geldiğini bilmez — testte sahte (mock) repository verirsiniz.",
+      },
+      { type: "h2", content: "Özet" },
+      {
+        type: "list",
+        ordered: true,
+        items: [
+          "UI sadece görüntü ve kullanıcı etkileşiminden sorumlu olsun.",
+          "İş kuralları domain katmanında, framework'süz Dart kodu olarak dursun.",
+          "Veri kaynağı değişince sadece data katmanını güncelleyin.",
+        ],
+      },
+    ],
+  },
+  {
+    id: "riverpod-rehber",
+    topic: "Flutter",
+    title: "Riverpod ile State Yönetimi: Başlangıç Rehberi",
+    excerpt: "Provider'ın ötesine geçin: Riverpod provider türleri, ref kullanımı ve pratik örnekler.",
+    category: "State",
+    emoji: "🌊",
+    readTime: 7,
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Riverpod", "State Management"],
+    content: [
+      {
+        type: "p",
+        content:
+          "Riverpod, compile-time güvenlik ve daha iyi test desteği sunan modern bir state management çözümüdür. Provider'dan geçiş yapıyorsanız veya yeni bir projeye başlıyorsanız bu rehber iyi bir başlangıç noktasıdır.",
+      },
+      { type: "h2", content: "Neden Riverpod?" },
+      {
+        type: "list",
+        items: [
+          "Provider'a göre daha güçlü dependency injection",
+          "Compile-time'da hata yakalama",
+          "Provider'ları global context olmadan okuyabilme",
+          "Async state için built-in destek",
+        ],
+      },
+      { type: "h2", content: "Temel provider türleri" },
+      { type: "h3", content: "Provider — sabit veya hesaplanmış değer" },
+      {
+        type: "code",
+        content: `final apiClientProvider = Provider((ref) => ApiClient());
+
+final greetingProvider = Provider((ref) => 'Merhaba Riverpod!');`,
+        language: "dart",
+      },
+      { type: "h3", content: "StateNotifierProvider — değişen state" },
+      {
+        type: "code",
+        content: `class CounterNotifier extends StateNotifier<int> {
+  CounterNotifier() : super(0);
+  void increment() => state++;
+}
+
+final counterProvider = StateNotifierProvider<CounterNotifier, int>(
+  (ref) => CounterNotifier(),
+);`,
+        language: "dart",
+      },
+      { type: "h2", content: "Widget'ta kullanım" },
+      {
+        type: "code",
+        content: `class CounterPage extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(counterProvider);
+    return Text('Sayı: \$count');
+  }
+}`,
+        language: "dart",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        content: "ref.watch dinler ve rebuild tetikler. ref.read tek seferlik okuma veya event handler içinde kullanılır.",
+      },
+    ],
+  },
+  {
+    id: "gorouter-navigasyon",
+    topic: "Flutter",
+    title: "GoRouter ile Modern Navigasyon",
+    excerpt: "Declarative routing, deep link, nested route ve redirect — hepsi GoRouter ile.",
+    category: "UI",
+    emoji: "🛤️",
+    readTime: 6,
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "GoRouter", "Navigation"],
+    content: [
+      {
+        type: "p",
+        content:
+          "Navigator.push ile sayfa sayfa ilerlemek küçük uygulamalarda işe yarar; route sayısı arttıkça yönetmek zorlaşır. GoRouter, URL tabanlı declarative routing sunar — web ve mobilde tutarlı davranır.",
+      },
+      { type: "h2", content: "Kurulum ve temel yapı" },
+      {
+        type: "code",
+        content: `final router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (_, __) => HomePage()),
+    GoRoute(path: '/profile', builder: (_, __) => ProfilePage()),
+    GoRoute(
+      path: '/product/:id',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return ProductPage(id: id);
+      },
+    ),
+  ],
+);
+
+// MaterialApp.router(routerConfig: router)`,
+        language: "dart",
+      },
+      { type: "h2", content: "Redirect ile auth kontrolü" },
+      {
+        type: "p",
+        content:
+          "Giriş yapmamış kullanıcıyı login sayfasına yönlendirmek için redirect callback kullanırsınız. Auth state değişince router otomatik yeniden değerlendirilir.",
+      },
+      {
+        type: "callout",
+        variant: "tip",
+        content: "ShellRoute ile alt navigasyon (bottom bar) ve nested route yapısı kurabilirsiniz — Instagram veya Twitter benzeri tab yapıları için idealdir.",
+      },
+    ],
+  },
+  {
+    id: "flutter-test",
+    topic: "Flutter",
+    title: "Flutter'da Test Yazmak: Unit, Widget, Integration",
+    excerpt: "Test piramidi, mock kullanımı ve güvenilir CI/CD için test stratejisi.",
+    category: "Temel",
+    emoji: "🧪",
+    readTime: 7,
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Testing", "CI/CD"],
+    content: [
+      {
+        type: "p",
+        content:
+          "Test yazmak zaman kaybı değil; refactor yaparken ve yeni özellik eklerken güven verir. Flutter üç test türünü destekler: unit, widget ve integration.",
+      },
+      { type: "h2", content: "Test piramidi" },
+      {
+        type: "list",
+        items: [
+          "Unit test — fonksiyon, sınıf, bloc/cubit (en çok, en hızlı)",
+          "Widget test — tek widget veya küçük widget ağacı",
+          "Integration test — uygulamanın uçtan uca akışı (en az, en yavaş)",
+        ],
+      },
+      { type: "h2", content: "Basit widget testi" },
+      {
+        type: "code",
+        content: `testWidgets('Butona basınca sayaç artar', (tester) async {
+  await tester.pumpWidget(const MaterialApp(home: CounterPage()));
+  expect(find.text('0'), findsOneWidget);
+  await tester.tap(find.byType(ElevatedButton));
+  await tester.pump();
+  expect(find.text('1'), findsOneWidget);
+});`,
+        language: "dart",
+      },
+      { type: "h2", content: "Özet" },
+      {
+        type: "p",
+        content:
+          "Önce iş mantığını (domain, bloc) unit test ile koruyun. Kritik ekranlar için widget test ekleyin. Release öncesi birkaç integration test yeterli olabilir.",
+      },
+    ],
+  },
+  {
+    id: "rag-nedir",
+    topic: "AI",
+    title: "RAG Nedir? Bilgi Tabanlı Yapay Zeka",
+    excerpt: "Retrieval-Augmented Generation: LLM'e kendi verinizi nasıl öğretirsiniz?",
+    category: "Temel",
+    emoji: "🔍",
+    readTime: 6,
+    publishedAt: "2026-07-09",
+    tags: ["AI", "RAG", "LLM", "Vector"],
+    featured: true,
+    content: [
+      {
+        type: "p",
+        content:
+          "ChatGPT genel bilgiyle cevap verir; şirket dokümanlarınızı veya güncel verinizi bilmez. RAG (Retrieval-Augmented Generation), soruya cevap vermeden önce ilgili belgeleri arayıp modele bağlam olarak verir.",
+      },
+      { type: "h2", content: "RAG nasıl çalışır?" },
+      {
+        type: "list",
+        ordered: true,
+        items: [
+          "Belgeler parçalara (chunk) bölünür ve vektör veritabanına kaydedilir.",
+          "Kullanıcı soru sorar; soru da vektöre dönüştürülür.",
+          "En benzer chunk'lar bulunur (semantic search).",
+          "Bu chunk'lar prompt'a eklenir; LLM bu bağlamla cevap üretir.",
+        ],
+      },
+      { type: "h2", content: "Ne zaman kullanılır?" },
+      {
+        type: "list",
+        items: [
+          "Şirket içi dokümantasyon asistanı",
+          "Müşteri destek chatbot'u (SSS, ürün kılavuzu)",
+          "Hukuk veya tıbbi metinlerde kaynak göstermeli cevap",
+        ],
+      },
+      {
+        type: "callout",
+        variant: "info",
+        content: "Fine-tuning modeli eğitmek pahalı ve yavaştır. RAG, veriyi güncel tutmak için genelde daha pratik bir seçenektir.",
+      },
+      { type: "h2", content: "Popüler araçlar" },
+      {
+        type: "p",
+        content:
+          "LangChain, LlamaIndex, Pinecone, Chroma, Supabase pgvector gibi araçlar RAG pipeline'ı kurmak için kullanılır. Küçük projelerde embedding + basit vektör araması bile işe yarar.",
+      },
+    ],
+  },
+  {
+    id: "fine-tuning-vs-prompt",
+    topic: "AI",
+    title: "Fine-tuning mi, Prompt Engineering mi?",
+    excerpt: "İki yaklaşımın farkı, maliyeti ve hangi senaryoda hangisini seçeceğiniz.",
+    category: "Pratik",
+    emoji: "⚖️",
+    readTime: 5,
+    publishedAt: "2026-07-09",
+    tags: ["AI", "Fine-tuning", "Prompt"],
+    content: [
+      {
+        type: "p",
+        content:
+          "Modeli özelleştirmenin iki yolu var: prompt ile yönlendirmek veya fine-tuning ile yeniden eğitmek. Çoğu durumda prompt yeterlidir; fine-tuning son çaredir.",
+      },
+      { type: "h2", content: "Prompt Engineering" },
+      {
+        type: "list",
+        items: [
+          "Hızlı, ucuz, geri alınması kolay",
+          "Few-shot örneklerle format ve ton ayarlanır",
+          "Model güncellenince prompt'u güncellemek yeterli",
+        ],
+      },
+      { type: "h2", content: "Fine-tuning" },
+      {
+        type: "list",
+        items: [
+          "Belirli bir görev veya dil stili için model davranışını kalıcı değiştirir",
+          "Eğitim verisi ve GPU maliyeti gerekir",
+          "Çok sayıda örnek (yüzlerce–binlerce) ister",
+        ],
+      },
+      {
+        type: "callout",
+        variant: "tip",
+        content: "Önce prompt + RAG deneyin. Hâlâ tutarlı sonuç alamıyorsanız fine-tuning veya daha güçlü bir base model düşünün.",
+      },
+    ],
+  },
+  {
+    id: "react-temelleri",
+    topic: "Web",
+    title: "React Temelleri: Component, Props ve State",
+    excerpt: "Modern web arayüzlerinin yapı taşları — JSX'ten hooks'a kısa bir yol haritası.",
+    category: "Frontend",
+    emoji: "⚛️",
+    readTime: 6,
+    publishedAt: "2026-07-09",
+    tags: ["React", "JavaScript", "Web", "Frontend"],
+    content: [
+      {
+        type: "p",
+        content:
+          "React, kullanıcı arayüzünü bileşenlere bölen bir kütüphanedir. Her bileşen kendi markup'ını ve davranışını tanımlar; büyük uygulamalar küçük, yeniden kullanılabilir parçalardan oluşur.",
+      },
+      { type: "h2", content: "Component ve JSX" },
+      {
+        type: "code",
+        content: `function Welcome({ name }: { name: string }) {
+  return <h1>Merhaba, {name}!</h1>;
+}
+
+// Kullanım: <Welcome name="Berkay" />`,
+        language: "tsx",
+      },
+      { type: "h2", content: "State ile etkileşim" },
+      {
+        type: "code",
+        content: `function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      Tıklanma: {count}
+    </button>
+  );
+}`,
+        language: "tsx",
+      },
+      { type: "h2", content: "Bu yazıda öğrendikleriniz" },
+      {
+        type: "list",
+        items: [
+          "Component = UI'ın yeniden kullanılabilir parçası",
+          "Props = dışarıdan gelen veri (read-only)",
+          "State = bileşenin kendi değişen verisi",
+        ],
+      },
+    ],
+  },
+  {
+    id: "typescript-frontend",
+    topic: "Web",
+    title: "TypeScript ile Daha Güvenli Frontend",
+    excerpt: "Tip güvenliği, interface'ler ve React + TypeScript best practice'leri.",
+    category: "Frontend",
+    emoji: "🔷",
+    readTime: 5,
+    publishedAt: "2026-07-09",
+    tags: ["TypeScript", "React", "Web"],
+    content: [
+      {
+        type: "p",
+        content:
+          "JavaScript esnek ama büyük projelerde tip hataları runtime'da patlar. TypeScript, derleme aşamasında hataları yakalar ve IDE'de otomatik tamamlama sunar.",
+      },
+      { type: "h2", content: "Temel tipler" },
+      {
+        type: "code",
+        content: `interface User {
+  id: number;
+  name: string;
+  email?: string; // opsiyonel
+}
+
+function greet(user: User): string {
+  return \`Merhaba, \${user.name}\`;
+}`,
+        language: "typescript",
+      },
+      { type: "h2", content: "React bileşenlerinde tip" },
+      {
+        type: "code",
+        content: `interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+export function Button({ label, onClick, disabled }: ButtonProps) {
+  return (
+    <button onClick={onClick} disabled={disabled}>
+      {label}
+    </button>
+  );
+}`,
+        language: "tsx",
+      },
+      {
+        type: "callout",
+        variant: "tip",
+        content: "any kullanmaktan kaçının. Bilinmeyen API yanıtları için unknown + type guard tercih edin.",
+      },
+    ],
+  },
+  {
+    id: "dio-http-flutter",
+    topic: "Flutter",
+    title: "Dio ile HTTP İstekleri: Interceptor ve Hata Yönetimi",
+    excerpt: "http paketinin ötesinde: interceptor, timeout, retry ve dosya yükleme.",
+    category: "Veri",
+    emoji: "🌐",
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Dio", "API", "HTTP"],
+    content: [
+      { type: "p", content: "Dio, Flutter'da en çok kullanılan HTTP istemcilerinden biridir. Interceptor desteği sayesinde her isteğe token eklemek, loglamak veya hata yakalamak merkezi yapılır." },
+      { type: "h2", content: "Bu yazıda neler var?" },
+      { type: "list", items: ["Dio kurulumu ve temel GET/POST", "Interceptor ile auth token", "Timeout ve hata yönetimi", "http paketinden farkı"] },
+      { type: "h2", content: "Kurulum" },
+      { type: "code", content: `final dio = Dio(BaseOptions(
+  baseUrl: 'https://api.ornek.com',
+  connectTimeout: Duration(seconds: 10),
+  headers: {'Content-Type': 'application/json'},
+));`, language: "dart" },
+      { type: "h2", content: "Interceptor örneği" },
+      { type: "code", content: `dio.interceptors.add(InterceptorsWrapper(
+  onRequest: (options, handler) {
+    options.headers['Authorization'] = 'Bearer \$token';
+    handler.next(options);
+  },
+  onError: (error, handler) {
+    if (error.response?.statusCode == 401) {
+      // logout veya token yenile
+    }
+    handler.next(error);
+  },
+));`, language: "dart" },
+      { type: "h2", content: "Ne zaman Dio?" },
+      { type: "list", items: ["Çoklu interceptor ihtiyacı", "Dosya upload/download", "İptal token (CancelToken)", "Gelişmiş hata ve retry mantığı"] },
+      { type: "h2", content: "Özet" },
+      { type: "p", content: "Basit tek istekler için http yeterli; büyüyen projelerde Dio ile merkezi API katmanı kurmak bakımı kolaylaştırır." },
+    ],
+  },
+  {
+    id: "hive-yerel-db",
+    topic: "Flutter",
+    title: "Hive ile Yerel Veritabanı",
+    excerpt: "NoSQL key-value depolama, type adapter ve offline-first uygulama.",
+    category: "Veri",
+    emoji: "🗄️",
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Hive", "Database", "Offline"],
+    content: [
+      { type: "p", content: "Hive, Flutter için hafif ve hızlı bir yerel veritabanıdır. SQL bilmeden key-value veya kutu (box) yapısıyla veri saklayabilirsiniz." },
+      { type: "h2", content: "Hive nedir?" },
+      { type: "p", content: "Pure Dart ile yazılmıştır; Android ve iOS'ta native performans verir. shared_preferences'tan daha güçlü, SQLite'tan daha basittir." },
+      { type: "h2", content: "Temel kullanım" },
+      { type: "code", content: `await Hive.initFlutter();
+final box = await Hive.openBox('ayarlar');
+box.put('tema', 'koyu');
+final tema = box.get('tema'); // 'koyu'`, language: "dart" },
+      { type: "h3", content: "TypeAdapter ile model saklama" },
+      { type: "code", content: `@HiveType(typeId: 0)
+class Not extends HiveObject {
+  @HiveField(0) String baslik;
+  @HiveField(1) String icerik;
+  Not({required this.baslik, required this.icerik});
+}
+// Hive.registerAdapter(NotAdapter());
+// box.add(not);`, language: "dart" },
+      { type: "h2", content: "Kullanım senaryoları" },
+      { type: "list", items: ["Kullanıcı ayarları ve cache", "Offline okuma listesi", "Sepet veya favoriler", "Son aramalar"] },
+      { type: "callout", variant: "tip", content: "Hassas veri (şifre, token) için flutter_secure_storage kullanın; Hive şifreleme desteği de sunar." },
+    ],
+  },
+  {
+    id: "flutter-performans",
+    topic: "Flutter",
+    title: "Flutter Performans İpuçları",
+    excerpt: "Jank, rebuild, const widget ve profiling — uygulamanızı hızlandırın.",
+    category: "Performans",
+    emoji: "⚡",
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Performance", "Optimizasyon"],
+    content: [
+      { type: "p", content: "Flutter varsayılan olarak hızlıdır; yine de yanlış widget kullanımı veya gereksiz rebuild performansı düşürür. Bu yazıda sık karşılaşılan sorunları ve çözümlerini topladım." },
+      { type: "h2", content: "Bu yazıda neler var?" },
+      { type: "list", items: ["const constructor kullanımı", "ListView.builder vs ListView", "RepaintBoundary ne işe yarar?", "DevTools Performance sekmesi"] },
+      { type: "h2", content: "const widget kullanın" },
+      { type: "p", content: "Değişmeyen widget'lara const verin; Flutter aynı instance'ı yeniden kullanır ve rebuild maliyeti düşer." },
+      { type: "code", content: `const SizedBox(height: 16),
+const Text('Sabit metin'),
+const Icon(Icons.home),`, language: "dart" },
+      { type: "h2", content: "Uzun listeler" },
+      { type: "p", content: "ListView(children: [...]) tüm öğeleri bir anda oluşturur. ListView.builder sadece görünenleri üretir — binlerce satırda fark yaratır." },
+      { type: "h2", content: "Profiling" },
+      { type: "list", ordered: true, items: ["flutter run --profile ile çalıştırın", "DevTools > Performance açın", "Kaydırma veya animasyon sırasında frame süresine bakın", "60 FPS altına düşen kareleri inceleyin"] },
+      { type: "h2", content: "Özet" },
+      { type: "p", content: "Önce ölçün, sonra optimize edin. Premature optimization yerine gerçek darboğazı bulun." },
+    ],
+  },
+  {
+    id: "firebase-auth-flutter",
+    topic: "Flutter",
+    title: "Flutter'da Firebase Authentication",
+    excerpt: "E-posta, Google ve Apple ile giriş — adım adım kurulum.",
+    category: "Backend",
+    emoji: "🔐",
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Firebase", "Auth"],
+    content: [
+      { type: "p", content: "Firebase Auth, kullanıcı girişini backend yazmadan yönetmenizi sağlar. FlutterFire paketleri ile birkaç satırda e-posta veya sosyal giriş ekleyebilirsiniz." },
+      { type: "h2", content: "Kurulum adımları" },
+      { type: "list", ordered: true, items: ["Firebase Console'da proje oluşturun", "flutterfire configure çalıştırın", "firebase_core ve firebase_auth ekleyin", "Android/iOS yapılandırmasını tamamlayın"] },
+      { type: "h2", content: "E-posta ile kayıt" },
+      { type: "code", content: `final auth = FirebaseAuth.instance;
+
+await auth.createUserWithEmailAndPassword(
+  email: email,
+  password: sifre,
+);
+
+await auth.signInWithEmailAndPassword(
+  email: email,
+  password: sifre,
+);`, language: "dart" },
+      { type: "h2", content: "Auth state dinleme" },
+      { type: "code", content: `StreamBuilder<User?>(
+  stream: FirebaseAuth.instance.authStateChanges(),
+  builder: (context, snapshot) {
+    if (snapshot.hasData) return AnaSayfa();
+    return GirisSayfasi();
+  },
+)`, language: "dart" },
+      { type: "callout", variant: "warning", content: "Şifre kurallarını ve e-posta doğrulamasını production'da mutlaka etkinleştirin." },
+    ],
+  },
+  {
+    id: "custom-widget-flutter",
+    topic: "Flutter",
+    title: "Custom Widget Yazmak",
+    excerpt: "Tekrar kullanılabilir bileşenler, parametreler ve composition.",
+    category: "UI",
+    emoji: "🧩",
+    publishedAt: "2026-07-09",
+    tags: ["Flutter", "Widget", "UI"],
+    content: [
+      { type: "p", content: "Her ekranda aynı kart veya buton stilini kopyalamak yerine custom widget yazarsınız. Kod tekrarı azalır, tasarım tutarlı kalır." },
+      { type: "h2", content: "Ne zaman custom widget?" },
+      { type: "list", items: ["Aynı UI pattern 3+ yerde kullanılıyorsa", "Karmaşık widget ağacını sadeleştirmek için", "Tasarım sistemi bileşeni oluştururken"] },
+      { type: "h2", content: "Örnek: Profil kartı" },
+      { type: "code", content: `class ProfilKarti extends StatelessWidget {
+  final String isim;
+  final String? altBaslik;
+  final String? resimUrl;
+  final VoidCallback? onTap;
+
+  const ProfilKarti({
+    super.key,
+    required this.isim,
+    this.altBaslik,
+    this.resimUrl,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundImage: resimUrl != null ? NetworkImage(resimUrl!) : null,
+        ),
+        title: Text(isim),
+        subtitle: altBaslik != null ? Text(altBaslik!) : null,
+        onTap: onTap,
+      ),
+    );
+  }
+}`, language: "dart" },
+      { type: "h2", content: "İyi pratikler" },
+      { type: "list", items: ["const constructor kullanın", "Gerekli parametreleri required yapın", "Widget'ı küçük ve tek sorumluluklu tutun", "Theme.of(context) ile renk/font alın"] },
+    ],
+  },
+  {
+    id: "chatgpt-api",
+    topic: "AI",
+    title: "ChatGPT API ile Uygulama Geliştirmek",
+    excerpt: "OpenAI API, mesaj formatı, streaming ve maliyet kontrolü.",
+    category: "Pratik",
+    emoji: "💬",
+    publishedAt: "2026-07-09",
+    tags: ["AI", "OpenAI", "API", "ChatGPT"],
+    content: [
+      { type: "p", content: "Kendi uygulamanıza sohbet veya metin üretme özelliği eklemek için OpenAI API kullanabilirsiniz. Bu yazıda temel akış ve dikkat edilecekler var." },
+      { type: "h2", content: "API anahtarı ve güvenlik" },
+      { type: "list", items: ["Anahtarı asla frontend'de (mobil/web) açık bırakmayın", "Backend veya Edge Function üzerinden proxy yapın", "Rate limit ve kullanım kotası ayarlayın"] },
+      { type: "h2", content: "Temel istek" },
+      { type: "code", content: `POST https://api.openai.com/v1/chat/completions
+{
+  "model": "gpt-4o-mini",
+  "messages": [
+    {"role": "system", "content": "Sen yardımcı bir asistansın."},
+    {"role": "user", "content": "Flutter'da state nedir?"}
+  ]
+}`, language: "json" },
+      { type: "h2", content: "Streaming cevap" },
+      { type: "p", content: "stream: true ile cevap parça parça gelir; kullanıcıya yazı yazılıyormuş hissi verir. Chat uygulamalarında standarttır." },
+      { type: "h2", content: "Maliyet ipuçları" },
+      { type: "list", items: ["Kısa system prompt yazın", "gpt-4o-mini gibi ucuz modelleri deneyin", "Gereksiz geçmiş mesajları göndermeyin", "max_tokens ile üst sınır koyun"] },
+    ],
+  },
+  {
+    id: "ai-agent-nedir",
+    topic: "AI",
+    title: "AI Agent Nedir? Araç Kullanan Yapay Zeka",
+    excerpt: "Agent, tool calling ve otonom görev zinciri kavramları.",
+    category: "Temel",
+    emoji: "🤖",
+    publishedAt: "2026-07-09",
+    tags: ["AI", "Agent", "LLM", "Automation"],
+    content: [
+      { type: "p", content: "Klasik chatbot sadece metin üretir. AI agent ise hedefe ulaşmak için adım adım karar verir, araçları (API, veritabanı, kod çalıştırma) kullanır ve sonucu size sunar." },
+      { type: "h2", content: "Agent vs chatbot" },
+      { type: "list", items: ["Chatbot: tek tur veya kısa diyalog", "Agent: plan yapar, araç çağırır, sonucu kontrol eder", "Örnek: 'Bu haftanın satış raporunu hazırla' → veri çek → analiz et → PDF üret"] },
+      { type: "h2", content: "Tool calling" },
+      { type: "p", content: "Modele hangi araçların olduğunu tanımlarsınız (fonksiyon şeması). Model hangi aracı ne zaman çağıracağına karar verir; siz sonucu modele geri verirsiniz." },
+      { type: "h2", content: "Popüler framework'ler" },
+      { type: "list", items: ["LangChain Agents", "OpenAI Assistants API", "AutoGPT / CrewAI tarzı multi-agent", "Cursor gibi IDE agent'ları"] },
+      { type: "callout", variant: "info", content: "Agent'lar güçlüdür ama hata yapabilir. Kritik işlemlerde insan onayı (human-in-the-loop) ekleyin." },
+    ],
+  },
+  {
+    id: "embedding-vektor",
+    topic: "AI",
+    title: "Embedding ve Vektör Arama",
+    excerpt: "Metni sayıya çevirmek, benzerlik aramak ve semantic search.",
+    category: "Temel",
+    emoji: "📐",
+    publishedAt: "2026-07-09",
+    tags: ["AI", "Embedding", "Vector", "Search"],
+    content: [
+      { type: "p", content: "Embedding, metni sabit boyutlu bir sayı vektörüne dönüştürür. Anlamca yakın metinler vektör uzayında birbirine yakın olur — bu sayede 'kedi' araması 'kediler' ve 'feline' ile de eşleşir." },
+      { type: "h2", content: "Nasıl çalışır?" },
+      { type: "list", ordered: true, items: ["Metin embedding modeline gönderilir", "Örn. 1536 boyutlu vektör döner", "Vektör veritabanına kaydedilir", "Sorgu da vektöre çevrilir; en yakın komşular bulunur"] },
+      { type: "h2", content: "Kullanım alanları" },
+      { type: "list", items: ["RAG sistemlerinde doküman arama", "Ürün veya içerik önerisi", "Duplicate içerik tespiti", "Soru-cevap eşleştirme"] },
+      { type: "h2", content: "Araçlar" },
+      { type: "p", content: "OpenAI text-embedding-3-small, Cohere embed, Supabase pgvector, Pinecone, Chroma. Küçük projede SQLite + vektör eklentisi bile yeterli olabilir." },
+    ],
+  },
+  {
+    id: "cursor-ai-ide",
+    topic: "AI",
+    title: "Cursor ve AI Destekli IDE'ler",
+    excerpt: "Kod tamamlama, chat ve agent modu ile verimli geliştirme.",
+    category: "Pratik",
+    emoji: "🖥️",
+    publishedAt: "2026-07-09",
+    tags: ["AI", "Cursor", "IDE", "Verimlilik"],
+    content: [
+      { type: "p", content: "Cursor, VS Code tabanlı bir editördür; içine gömülü AI ile kod yazma, refactor ve hata ayıklama hızlanır. GitHub Copilot'a alternatif olarak yaygınlaştı." },
+      { type: "h2", content: "Temel özellikler" },
+      { type: "list", items: ["Tab ile satır tamamlama", "Chat ile proje hakkında soru sorma", "Agent modu ile çok dosyalı değişiklik", "@dosya ile bağlam verme"] },
+      { type: "h2", content: "Verimli kullanım" },
+      { type: "list", ordered: true, items: ["Görevi net ve küçük parçalara bölün", "İlgili dosyaları @ ile ekleyin", "Üretilen kodu çalıştırıp test edin", "Hassas kodu cloud'a göndermeyin (privacy ayarları)"] },
+      { type: "h2", content: "Sınırlar" },
+      { type: "p", content: "AI her zaman güncel API veya proje yapınızı bilmez. Mimari kararlar ve code review sizde kalmalı; AI hızlandırıcıdır, yerinize geçmez." },
+    ],
+  },
+  {
+    id: "tailwind-css",
+    topic: "Web",
+    title: "Tailwind CSS'e Giriş",
+    excerpt: "Utility-first CSS, responsive ve dark mode ile hızlı arayüz.",
+    category: "Frontend",
+    emoji: "🎨",
+    publishedAt: "2026-07-09",
+    tags: ["Web", "Tailwind", "CSS"],
+    content: [
+      { type: "p", content: "Tailwind, hazır utility sınıflarıyla HTML/JSX içinde stil yazmanızı sağlar. Ayrı CSS dosyası açmadan flex, padding, renk gibi işlemleri class ile yaparsınız." },
+      { type: "h2", content: "Utility-first ne demek?" },
+      { type: "code", content: `<div class="flex items-center gap-4 p-6 rounded-lg border bg-white">
+  <img class="w-12 h-12 rounded-full" src="..." />
+  <h2 class="text-lg font-semibold text-gray-900">Başlık</h2>
+</div>`, language: "html" },
+      { type: "h2", content: "Responsive" },
+      { type: "p", content: "sm:, md:, lg: önekleri ile breakpoint'e göre stil verirsiniz. Örn. md:grid-cols-2 tablet ve üstünde iki sütun." },
+      { type: "h2", content: "Avantajlar ve dezavantajlar" },
+      { type: "list", items: ["+ Hızlı prototip, tutarlı spacing", "+ Purge ile küçük bundle", "- Uzun class listeleri", "- Takım alışkanlığı gerekir"] },
+    ],
+  },
+  {
+    id: "vite-hizli-gelistirme",
+    topic: "Web",
+    title: "Vite ile Hızlı Web Geliştirme",
+    excerpt: "ESM tabanlı dev server, HMR ve production build.",
+    category: "Araçlar",
+    emoji: "⚡",
+    publishedAt: "2026-07-09",
+    tags: ["Web", "Vite", "React", "Build"],
+    content: [
+      { type: "p", content: "Vite, modern frontend projeleri için build aracıdır. Create React App'e göre çok daha hızlı başlar ve Hot Module Replacement (HMR) anlık güncelleme sunar." },
+      { type: "h2", content: "Yeni proje" },
+      { type: "code", content: `npm create vite@latest my-app -- --template react-ts
+cd my-app
+npm install
+npm run dev`, language: "bash" },
+      { type: "h2", content: "Neden Vite?" },
+      { type: "list", items: ["Anında dev server (native ESM)", "Hızlı HMR", "Rollup ile optimize production build", "React, Vue, Svelte şablonları"] },
+      { type: "h2", content: "Komutlar" },
+      { type: "list", items: ["npm run dev — geliştirme", "npm run build — production", "npm run preview — build önizleme"] },
+    ],
+  },
+  {
+    id: "git-versiyon-kontrol",
+    topic: "Web",
+    title: "Git ile Versiyon Kontrolü",
+    excerpt: "commit, branch, merge ve GitHub workflow temelleri.",
+    category: "Araçlar",
+    emoji: "🌿",
+    publishedAt: "2026-07-09",
+    tags: ["Git", "GitHub", "Workflow"],
+    content: [
+      { type: "p", content: "Git, kodunuzun geçmişini saklar; istediğiniz ana dönebilir, ekipçe paralel çalışabilirsiniz. Her yazılımcının bilmesi gereken temel araçlardan biridir." },
+      { type: "h2", content: "Temel komutlar" },
+      { type: "code", content: `git init
+git add .
+git commit -m "İlk commit"
+git branch feature/yeni-ozellik
+git checkout feature/yeni-ozellik
+git merge main
+git push origin main`, language: "bash" },
+      { type: "h2", content: "Branch stratejisi" },
+      { type: "list", items: ["main — production'a hazır kod", "develop — geliştirme birleşim", "feature/* — yeni özellik", "hotfix/* — acil düzeltme"] },
+      { type: "h2", content: "İyi commit mesajı" },
+      { type: "p", content: "Ne yaptığınızı kısa ve net yazın: 'Add user login form', 'Fix navbar overflow on mobile'. Gelecekteki siz ve takımınız teşekkür eder." },
+      { type: "callout", variant: "tip", content: "Günde en az bir commit alışkanlığı, ilerlemeyi görünür kılar ve kayıp iş riskini azaltır." },
+    ],
+  },
+  {
+    id: "ogrenme-yolu-yazilim",
+    topic: "Web",
+    title: "Yazılımcı Olarak Öğrenme Yolu",
+    excerpt: "Temelden ileri seviyeye: hangi sırayla ne öğrenmeli?",
+    category: "Kariyer",
+    emoji: "🗺️",
+    publishedAt: "2026-07-09",
+    tags: ["Kariyer", "Öğrenme", "Roadmap"],
+    featured: true,
+    content: [
+      { type: "p", content: "Yazılım öğrenmek maraton, sprint değil. Bu yazıda başlangıçtan işe hazır olmaya kadar mantıklı bir sıra ve pratik öneriler paylaşıyorum." },
+      { type: "h2", content: "1. Temel programlama" },
+      { type: "list", items: ["Değişken, döngü, fonksiyon, koşul", "Bir dil seçin (Python, JavaScript veya Dart)", "Küçük konsol projeleri yapın"] },
+      { type: "h2", content: "2. Veri yapıları ve algoritma" },
+      { type: "p", content: "Dizi, liste, hash map; sıralama ve arama mantığı. Her gün bir problem çözmek (LeetCode, HackerRank) uzun vadede fark yaratır." },
+      { type: "h2", content: "3. Alan seçimi" },
+      { type: "list", items: ["Web: HTML, CSS, JavaScript → React", "Mobil: Flutter veya native", "Backend: API, veritabanı, auth", "AI: Python, ML temelleri, LLM"] },
+      { type: "h2", content: "4. Proje odaklı öğrenme" },
+      { type: "p", content: "Tutorial hell'den çıkmak için kendi projenizi yapın: todo app, hava durumu, portfolyo sitesi. Bitmiş küçük proje, yarım kalmış büyük projeden iyidir." },
+      { type: "h2", content: "5. Topluluk ve süreklilik" },
+      { type: "list", items: ["GitHub'da kod paylaşın", "Blog veya not tutun (bu site gibi)", "Açık kaynak projelere bakın", "Her gün 30 dakika bile yeterli"] },
+      { type: "quote", content: "En iyi öğrenme yolu, merak ettiğin şeyi inşa etmektir.", author: "Anonim" },
     ],
   },
 ];
