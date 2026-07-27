@@ -1,47 +1,52 @@
 @import "tailwindcss";
+
 :root {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8f8f8;
+  --color-bg-primary: #f8f7f4;
+  --color-bg-secondary: #f0efec;
   --color-surface: #ffffff;
-  --color-border: #eaeaea;
-  --color-text-primary: #111111;
-  --color-text-secondary: #666666;
-  --color-text-disabled: #999999;
-  --color-accent: #111111;
-  --color-success: #16a34a;
-  --color-warning: #ca8a04;
-  --color-error: #dc2626;
+  --color-border: #e8e8e6;
+  --color-text-primary: #0a0a0f;
+  --color-text-secondary: #5a5a66;
+  --color-text-disabled: #9c9ca8;
+  --color-accent: #0a0a0f;
+  --color-accent-muted: #7c3aed;
 
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 12px;
+  --radius-lg: 14px;
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --shadow-focus: 0 0 0 2px #ffffff, 0 0 0 4px #111111;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
+  --shadow-focus: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-accent);
+
+  --page-x: clamp(1.25rem, 4vw, 3rem);
 }
 
 @layer base {
-  * {
-    border: var(--color-border);
-  }
-
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+  }
+
   body {
     margin: 0;
     min-width: 320px;
-    min-height: 100vh;
+    min-height: 100dvh;
     font-family: var(--font-sans);
     background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
-    letter-spacing: -0.011em;
+    letter-spacing: -0.015em;
     line-height: 1.6;
+    overflow-x: hidden;
   }
 
   :focus-visible {
@@ -50,8 +55,8 @@
   }
 
   ::selection {
-    background-color: #111111;
-    color: #ffffff;
+    background-color: var(--color-accent);
+    color: var(--color-bg-primary);
   }
 }
 
@@ -68,22 +73,81 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .page-x {
+    padding-left: var(--page-x);
+    padding-right: var(--page-x);
+  }
+
+  .display-headline {
+    font-size: clamp(2.75rem, 7vw, 5.5rem);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+  }
+
+  .film-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-33.333%); }
+  }
+
+  @keyframes marquee-reverse {
+    from { transform: translateX(-33.333%); }
+    to { transform: translateX(0); }
+  }
+
+  .animate-marquee {
+    animation: marquee linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: marquee-reverse linear infinite;
+  }
+
+  .group:hover .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+html.has-custom-cursor,
+html.has-custom-cursor body,
+html.has-custom-cursor a,
+html.has-custom-cursor button,
+html.has-custom-cursor [data-cursor="hover"] {
+  cursor: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none;
+  }
 }
 
 [data-theme="dark"] {
-  --color-bg-primary: #0a0a0a;
-  --color-bg-secondary: #111111;
-  --color-surface: #141414;
-  --color-border: #262626;
-  --color-text-primary: #fafafa;
-  --color-text-secondary: #a3a3a3;
-  --color-text-disabled: #737373;
-  --color-accent: #fafafa;
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-focus: 0 0 0 2px #0a0a0a, 0 0 0 4px #fafafa;
+  --color-bg-primary: #0a0a0f;
+  --color-bg-secondary: #13131a;
+  --color-surface: #16161f;
+  --color-border: #262632;
+  --color-text-primary: #f5f5f0;
+  --color-text-secondary: #9c9ca8;
+  --color-text-disabled: #6b6b78;
+  --color-accent: #f5f5f0;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.25);
+  --shadow-focus: 0 0 0 2px #0a0a0f, 0 0 0 4px #f5f5f0;
 }
 
 [data-theme="dark"] ::selection {
-  background-color: #fafafa;
-  color: #111111;
+  background-color: #f5f5f0;
+  color: #0a0a0f;
 }
