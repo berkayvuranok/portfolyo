@@ -1,37 +1,49 @@
-import { motion } from "framer-motion";
 import { certificates } from "../../data/certificates";
-import { Card } from "../ui/Card";
-import { Badge } from "../ui/Badge";
 import { SectionHeader } from "../ui/SectionHeader";
+import { HoverSweep } from "../motion/HoverSweep";
 
 export function CertificatesSection() {
+  const items = certificates.flatMap((cert) =>
+    cert.items.map((item) => ({
+      year: cert.provider.slice(0, 12),
+      title: item,
+      detail: cert.provider,
+    }))
+  );
+
+  // Grouped view — keep provider cards but with sweep feel
   return (
     <div>
       <SectionHeader
+        eyebrow="Credentials"
         title="Sertifikalar"
         description="Tamamladığım eğitimler ve aldığım sertifikalar."
       />
 
-      <div className="space-y-4">
+      <div className="space-y-10">
         {certificates.map((cert, i) => (
-          <motion.div
-            key={cert.provider}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: i * 0.05 }}
-          >
-            <Card>
-              <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-4">
+          <div key={cert.provider}>
+            <div className="mb-4 flex items-baseline gap-4">
+              <span className="text-[10px] tabular-nums tracking-wider text-[var(--color-text-disabled)]">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--color-text-primary)]">
                 {cert.provider}
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {cert.items.map((item) => (
-                  <Badge key={item}>{item}</Badge>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
+            </div>
+            <HoverSweep
+              items={cert.items.map((item) => ({
+                year: "CERT",
+                title: item,
+                detail: "Tamamlandı",
+              }))}
+            />
+          </div>
         ))}
+
+        {items.length === 0 && (
+          <p className="text-sm text-[var(--color-text-secondary)]">Henüz sertifika yok.</p>
+        )}
       </div>
     </div>
   );
