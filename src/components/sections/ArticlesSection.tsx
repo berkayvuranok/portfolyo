@@ -73,6 +73,7 @@ export const ArticlesSection = memo(function ArticlesSection({
   return (
     <div>
       <SectionHeader
+        eyebrow="Journal"
         title="Yazılarım"
         description="Teknik notlar, rehberler ve öğrenme kayıtları. Flutter, AI ve web geliştirme üzerine."
       />
@@ -167,38 +168,42 @@ const FeaturedArticleCard = memo(function FeaturedArticleCard({
   const meta = getArticleMeta(article);
   return (
     <motion.button
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       onClick={onClick}
-      className="text-left w-full group"
+      data-cursor="hover"
+      data-cursor-label="Read"
+      className="text-left w-full group relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8 sm:p-10 lg:p-12"
     >
-      <Card hover padding="lg" className="relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-6">
-          <span className="text-4xl shrink-0" aria-hidden="true">
-            {article.emoji}
-          </span>
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge>{article.category}</Badge>
-              {meta.tags.slice(0, 2).map((tag) => (
-                <Badge key={tag} variant="outline">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-            <h3 className="text-xl sm:text-2xl font-semibold tracking-tight text-[var(--color-text-primary)] group-hover:underline underline-offset-4">
-              {article.title}
-            </h3>
-            <p className="mt-3 text-sm sm:text-base text-[var(--color-text-secondary)] leading-relaxed line-clamp-2">
-              {article.excerpt}
-            </p>
-            <div className="mt-4">
-              <ArticleMeta article={article} />
-            </div>
+      <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-[var(--color-text-primary)]/[0.04] to-transparent" />
+      <div className="relative flex flex-col sm:flex-row sm:items-end gap-8">
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--color-text-disabled)] mb-4">
+            Featured
+          </p>
+          <div className="flex flex-wrap gap-2 mb-5">
+            <Badge>{article.category}</Badge>
+            {meta.tags.slice(0, 2).map((tag) => (
+              <Badge key={tag} variant="outline">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <h3 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-[-0.03em] text-[var(--color-text-primary)] group-hover:underline underline-offset-4 decoration-[var(--color-border)]">
+            {article.title}
+          </h3>
+          <p className="mt-4 text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed line-clamp-2 max-w-2xl">
+            {article.excerpt}
+          </p>
+          <div className="mt-6">
+            <ArticleMeta article={article} />
           </div>
         </div>
-      </Card>
+        <span className="text-5xl sm:text-6xl shrink-0" aria-hidden="true">
+          {article.emoji}
+        </span>
+      </div>
     </motion.button>
   );
 });
