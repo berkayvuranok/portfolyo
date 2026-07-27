@@ -1,9 +1,8 @@
 import { memo } from "react";
-import { motion } from "framer-motion";
 import type { Skill } from "../../types";
 import { skills, skillCategories } from "../../data/skills";
-import { Card } from "../ui/Card";
 import { SectionHeader } from "../ui/SectionHeader";
+import { SpotlightCard } from "../motion/SpotlightCard";
 
 interface SkillsSectionProps {
   searchQuery: string;
@@ -16,11 +15,12 @@ export const SkillsSection = memo(function SkillsSection({ searchQuery, onSkillS
   return (
     <div>
       <SectionHeader
-        title="Teknik Yetenekler"
-        description="Detayları ve ilgili projeleri görmek için kartlara tıklayın."
+        eyebrow="Toolkit"
+        title="Yetenekler"
+        description="Kartlara tıklayarak detay ve ilgili projeleri gör."
       />
 
-      <div className="space-y-10">
+      <div className="space-y-14">
         {skillCategories.map((category) => {
           const categorySkills = skills.filter((skill) => {
             if (skill.category !== category) return false;
@@ -35,12 +35,29 @@ export const SkillsSection = memo(function SkillsSection({ searchQuery, onSkillS
 
           return (
             <section key={category}>
-              <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-[var(--color-text-disabled)]">
-                {category}
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <div className="mb-5 flex items-center gap-4">
+                <h3 className="text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--color-text-disabled)]">
+                  {category}
+                </h3>
+                <div className="h-px flex-1 bg-[var(--color-border)]" />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {categorySkills.map((skill, i) => (
-                  <SkillCard key={skill.name} skill={skill} index={i} onClick={() => onSkillSelect(skill)} />
+                  <SpotlightCard
+                    key={skill.name}
+                    onClick={() => onSkillSelect(skill)}
+                    cursorLabel="Detail"
+                    index={i}
+                    className="w-full p-5 text-left"
+                  >
+                    <span className="text-2xl mb-3 block transition-transform duration-300 group-hover:scale-110" aria-hidden="true">
+                      {skill.icon}
+                    </span>
+                    <span className="block text-sm font-medium text-[var(--color-text-primary)]">{skill.name}</span>
+                    <span className="mt-1 block text-[10px] text-[var(--color-text-disabled)] line-clamp-1">
+                      {skill.category}
+                    </span>
+                  </SpotlightCard>
                 ))}
               </div>
             </section>
@@ -48,32 +65,5 @@ export const SkillsSection = memo(function SkillsSection({ searchQuery, onSkillS
         })}
       </div>
     </div>
-  );
-});
-
-const SkillCard = memo(function SkillCard({
-  skill,
-  index,
-  onClick,
-}: {
-  skill: Skill;
-  index: number;
-  onClick: () => void;
-}) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.03 }}
-      onClick={onClick}
-      className="text-left w-full"
-    >
-      <Card hover padding="sm" className="flex flex-col items-center text-center h-full">
-        <span className="text-2xl mb-2" aria-hidden="true">
-          {skill.icon}
-        </span>
-        <span className="text-sm font-medium text-[var(--color-text-primary)]">{skill.name}</span>
-      </Card>
-    </motion.button>
   );
 });
